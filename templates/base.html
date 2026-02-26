@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" x-data="appState()" :class="{ 'dark': isDark }">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Master AI Chef{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Instrument Sans", "system-ui", "sans-serif"],
+            display: ["Sora", "Instrument Sans", "sans-serif"],
+          },
+          boxShadow: {
+            glass: "0 10px 35px rgba(15, 23, 42, 0.12)",
+          },
+        },
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    :root {
+      --bg-main: #f6f8fb;
+      --bg-panel: rgba(255, 255, 255, 0.72);
+      --text-main: #111827;
+    }
+    .dark {
+      --bg-main: #0b1220;
+      --bg-panel: rgba(17, 24, 39, 0.72);
+      --text-main: #e5e7eb;
+    }
+    body {
+      font-family: "Instrument Sans", sans-serif;
+      background:
+        radial-gradient(circle at 6% 8%, rgba(15, 118, 110, 0.15), transparent 26%),
+        radial-gradient(circle at 92% 16%, rgba(249, 115, 22, 0.12), transparent 22%),
+        var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+    .glass {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .page-enter {
+      animation: page-enter 220ms ease-out;
+    }
+    @keyframes page-enter {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    [x-cloak] { display: none !important; }
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator { display: block; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% if user.is_authenticated %}
+    <header class="sticky top-0 z-40 border-b border-white/40 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 lg:px-6">
+        <a href="{% url 'recipes:dashboard' %}" class="flex items-center gap-2 text-lg font-display font-semibold tracking-tight dark:text-slate-100">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow">AI</span>
+          <span class="hidden sm:inline">Master Chef</span>
+        </a>
+        <form action="{% url 'recipes:search' %}" method="get" class="hidden flex-1 md:block">
+          <div class="relative">
+            <input name="q" value="{{ request.GET.q }}" placeholder="Search recipes, ingredients, cuisine..." class="w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-2.5 pl-10 text-sm text-slate-800 outline-none transition focus:border-teal-300 focus:ring-2 focus:ring-teal-200 dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100">
+            <svg class="absolute left-3 top-2.5 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/></svg>
+          </div>
+        </form>
+        <a href="{% url 'recipes:recipe_create' %}" class="hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:translate-y-[-1px] hover:shadow-lg md:inline-flex">Add Recipe</a>
+        <button type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white/90 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300" aria-label="Notifications">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.31 6.022c1.733.64 3.56 1.09 5.454 1.31m5.713 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        </button>
+        <button type="button" @click="toggleTheme" class="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white/90 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300" aria-label="Toggle dark mode">
+          <svg x-show="!isDark" x-cloak class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364 6.364-1.06-1.06M6.696 6.696l-1.06-1.06m12.728 0-1.06 1.06M6.696 17.304l-1.06 1.06M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>
+          <svg x-show="isDark" x-cloak class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 12.79A9 9 0 1 1 11.21 3a7.5 7.5 0 0 0 9.79 9.79Z"/></svg>
+        </button>
+        <div class="relative" x-data="{ open: false }">
+          <button @click="open = !open" type="button" class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800">
+            <span class="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 text-xs font-bold text-white">{{ user.username|first|upper }}</span>
+            <span class="hidden text-slate-700 dark:text-slate-200 sm:inline">{{ user.username }}</span>
+          </button>
+          <div x-show="open" @click.outside="open = false" x-transition x-cloak class="absolute right-0 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <a href="{% url 'accounts:profile' %}" class="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Profile</a>
+            <a href="{% url 'recipes:recipe_list' %}" class="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">My Recipes</a>
+            <a href="{% url 'recipes:shared_recipes' %}" class="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Shared With Me</a>
+            <a href="{% url 'recipes:favorite_recipes' %}" class="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Favorites</a>
+            <a href="{% url 'accounts:logout' %}" class="mt-1 block rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <div class="mx-auto flex w-full max-w-7xl gap-6 px-4 pb-28 pt-5 lg:px-6">
+      <aside class="glass sticky top-24 hidden h-fit w-64 shrink-0 rounded-3xl p-4 shadow-glass lg:block">
+        <nav class="space-y-1 text-sm">
+          <a href="{% url 'recipes:dashboard' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">Dashboard</a>
+          <a href="{% url 'recipes:recipe_list' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">My Recipes</a>
+          <a href="{% url 'recipes:favorite_recipes' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">Favorites</a>
+          <a href="{% url 'recipes:to_try_recipes' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">To Try</a>
+          <a href="{% url 'recipes:made_before_recipes' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">Made Before</a>
+          <a href="{% url 'recipes:shared_recipes' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">Shared Recipes</a>
+          <a href="{% url 'recipes:ai_tools' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">AI Tools</a>
+          <a href="{% url 'accounts:settings' %}" class="block rounded-xl px-3 py-2 hover:bg-teal-50 dark:hover:bg-slate-800">Settings</a>
+        </nav>
+      </aside>
+      <main class="min-w-0 flex-1 page-enter">
+  {% else %}
+      <main class="mx-auto min-h-screen w-full max-w-lg px-4 py-10 sm:px-6">
+  {% endif %}
+        {% if messages %}
+          <div class="{% if user.is_authenticated %}fixed right-4 top-20 z-50 w-full max-w-sm{% else %}mb-6{% endif %} space-y-2">
+            {% for message in messages %}
+              <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition class="rounded-2xl border border-white/30 bg-white/90 px-4 py-3 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900/90">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </main>
+  {% if user.is_authenticated %}
+    </div>
+    <nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur lg:hidden dark:border-slate-700 dark:bg-slate-900/95">
+      <div class="mx-auto grid max-w-lg grid-cols-5 gap-1 text-xs">
+        <a href="{% url 'recipes:dashboard' %}" class="rounded-lg px-2 py-2 text-center">Home</a>
+        <a href="{% url 'recipes:recipe_list' %}" class="rounded-lg px-2 py-2 text-center">Recipes</a>
+        <a href="{% url 'recipes:favorite_recipes' %}" class="rounded-lg px-2 py-2 text-center">Favorites</a>
+        <a href="{% url 'recipes:ai_tools' %}" class="rounded-lg px-2 py-2 text-center">AI</a>
+        <a href="{% url 'accounts:settings' %}" class="rounded-lg px-2 py-2 text-center">Settings</a>
+      </div>
+      <a href="{% url 'recipes:recipe_create' %}" class="absolute -top-5 right-4 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-xl font-semibold text-white shadow-lg">+</a>
+    </nav>
+  {% endif %}
+
+  <script>
+    function appState() {
+      return {
+        isDark: false,
+        init() {
+          const saved = localStorage.getItem("theme");
+          if (saved === "dark") this.isDark = true;
+          if (saved === "light") this.isDark = false;
+          if (!saved) this.isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.classList.toggle("dark", this.isDark);
+        },
+        toggleTheme() {
+          this.isDark = !this.isDark;
+          document.documentElement.classList.toggle("dark", this.isDark);
+          localStorage.setItem("theme", this.isDark ? "dark" : "light");
+        },
+      };
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

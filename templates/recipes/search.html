@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Search Recipes{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-5 shadow-glass" x-data="{ open: true }">
+  <div class="flex items-center justify-between">
+    <h1 class="font-display text-2xl font-bold">Search Recipes</h1>
+    <button type="button" @click="open = !open" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">Advanced Filters</button>
+  </div>
+
+  <form id="search-form" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-4" x-show="open">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Name, ingredient, or keyword" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80" hx-get="{{ results_url }}" hx-trigger="keyup changed delay:350ms" hx-target="#search-results" hx-include="#search-form" hx-indicator="#search-loading">
+    <input type="text" name="ingredient" value="{{ request.GET.ingredient }}" placeholder="Ingredient" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80" hx-get="{{ results_url }}" hx-trigger="keyup changed delay:350ms" hx-target="#search-results" hx-include="#search-form" hx-indicator="#search-loading">
+    <input type="text" name="cuisine" value="{{ request.GET.cuisine }}" placeholder="Cuisine" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80" hx-get="{{ results_url }}" hx-trigger="keyup changed delay:350ms" hx-target="#search-results" hx-include="#search-form" hx-indicator="#search-loading">
+    <input type="number" name="max_prep" value="{{ request.GET.max_prep }}" placeholder="Max prep time (minutes)" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80" hx-get="{{ results_url }}" hx-trigger="keyup changed delay:350ms" hx-target="#search-results" hx-include="#search-form" hx-indicator="#search-loading">
+  </form>
+</section>
+
+<div id="search-loading" class="mt-5 htmx-indicator">
+  {% include "components/skeleton_cards.html" %}
+</div>
+
+<section id="search-results" class="mt-5" hx-get="{{ results_url }}" hx-trigger="load" hx-include="#search-form" hx-indicator="#search-loading">
+</section>
+{% endblock %}

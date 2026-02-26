@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Public Recipes{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-5 shadow-glass">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="font-display text-2xl font-bold">Public Recipes</h1>
+    <a href="{% url 'recipes:search' %}" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">Advanced Search</a>
+  </div>
+  <form method="get" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-4">
+    <input name="q" value="{{ request.GET.q }}" placeholder="Name or ingredient" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <input name="cuisine" value="{{ request.GET.cuisine }}" placeholder="Cuisine" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <input name="max_prep" value="{{ request.GET.max_prep }}" placeholder="Max prep time" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <button class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Apply</button>
+  </form>
+</section>
+
+<section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+  {% for recipe in recipes %}
+    {% include "components/recipe_card.html" with recipe=recipe %}
+  {% empty %}
+    <p class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700">No public recipes found.</p>
+  {% endfor %}
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}

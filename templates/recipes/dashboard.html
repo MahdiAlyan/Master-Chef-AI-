@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-6 shadow-glass">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-sm text-slate-500 dark:text-slate-300">Welcome back</p>
+      <h1 class="font-display text-2xl font-bold sm:text-3xl">{{ user.first_name|default:user.username }}, ready to cook?</h1>
+    </div>
+    <a href="{% url 'recipes:recipe_create' %}" class="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow">Create Recipe</a>
+  </div>
+</section>
+
+<section class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+  <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90"><p class="text-xs text-slate-500">Total recipes</p><p class="mt-2 text-2xl font-semibold">{{ total_recipes }}</p></div>
+  <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90"><p class="text-xs text-slate-500">Favorites</p><p class="mt-2 text-2xl font-semibold">{{ favorite_count }}</p></div>
+  <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90"><p class="text-xs text-slate-500">To Try</p><p class="mt-2 text-2xl font-semibold">{{ to_try_count }}</p></div>
+  <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90"><p class="text-xs text-slate-500">Made Before</p><p class="mt-2 text-2xl font-semibold">{{ made_before_count }}</p></div>
+  <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90"><p class="text-xs text-slate-500">Shared with others</p><p class="mt-2 text-2xl font-semibold">{{ shared_with_others_count }}</p></div>
+</section>
+
+<section class="mt-8">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="font-display text-xl font-semibold">Recently Added</h2>
+    <a href="{% url 'recipes:recipe_list' %}" class="text-sm text-teal-600">View all</a>
+  </div>
+  <div class="hidden grid-cols-1 gap-4 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+    {% for recipe in recent_recipes %}
+      {% include "components/recipe_card.html" with recipe=recipe %}
+    {% empty %}
+      <p class="text-sm text-slate-500">No recipes yet.</p>
+    {% endfor %}
+  </div>
+  <div class="sm:hidden">
+    <div class="flex snap-x gap-4 overflow-x-auto pb-2">
+      {% for recipe in recent_recipes %}
+        <div class="min-w-[82%] snap-center">
+          {% include "components/recipe_card.html" with recipe=recipe %}
+        </div>
+      {% empty %}
+        <p class="text-sm text-slate-500">No recipes yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="mb-3 font-display text-xl font-semibold">Recently Viewed</h2>
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+    {% for recipe in recently_viewed %}
+      <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-900/85">
+        <p class="font-semibold">{{ recipe.name }}</p>
+        <p class="mt-1 text-sm text-slate-500">{{ recipe.cuisine_type|default:"Global cuisine" }} • {{ recipe.preparation_time }} min</p>
+      </a>
+    {% empty %}
+      <p class="text-sm text-slate-500">You have not viewed any recipes recently.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="mb-3 font-display text-xl font-semibold">AI Suggestions</h2>
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90">
+      <h3 class="font-semibold">Based on your favorites</h3>
+      <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+        {% for item in ai_suggestions.based_on_favorites|slice:":4" %}<li>{{ item }}</li>{% empty %}<li>No suggestions yet.</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90">
+      <h3 class="font-semibold">Quick meals under 30 mins</h3>
+      <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+        {% for item in ai_suggestions.quick_meals|slice:":4" %}<li>{{ item }}</li>{% empty %}<li>No quick meals yet.</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="rounded-2xl bg-white/90 p-4 shadow-sm dark:bg-slate-900/90">
+      <h3 class="font-semibold">Healthy options</h3>
+      <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+        {% for item in ai_suggestions.healthy_options|slice:":4" %}<li>{{ item }}</li>{% empty %}<li>No healthy options yet.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

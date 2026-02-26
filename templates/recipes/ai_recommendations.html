@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}AI Recommendations{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-5 shadow-glass">
+  <h1 class="font-display text-2xl font-bold">Smart Recommendations</h1>
+  <p class="mt-1 text-sm text-slate-500">Personalized picks based on your favorites and cooking history.</p>
+</section>
+
+{% if error %}
+  <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/20">{{ error }}</div>
+{% endif %}
+
+<section class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+  {% for title in recommended %}
+    <div class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/85">
+      <p class="font-semibold">{{ title }}</p>
+    </div>
+  {% empty %}
+    <p class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700">No recommendations available yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

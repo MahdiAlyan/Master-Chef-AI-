@@ -1,0 +1,13 @@
+{% if is_paginated %}
+  <nav class="mt-6 flex items-center justify-between rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <div>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+    <div class="flex gap-2">
+      {% if page_obj.has_previous %}
+        <a href="?{{ filter_query }}page={{ page_obj.previous_page_number }}" class="rounded-lg border border-slate-200 px-3 py-1.5 dark:border-slate-700">Previous</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?{{ filter_query }}page={{ page_obj.next_page_number }}" class="rounded-lg border border-slate-200 px-3 py-1.5 dark:border-slate-700">Next</a>
+      {% endif %}
+    </div>
+  </nav>
+{% endif %}

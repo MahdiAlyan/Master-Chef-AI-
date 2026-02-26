@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ list_title }}{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-5 shadow-glass" x-data="{ filtersOpen: false }">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="font-display text-2xl font-bold">{{ list_title }}</h1>
+    <div class="flex gap-2">
+      <button type="button" @click="filtersOpen = !filtersOpen" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">Filters</button>
+      <a href="{% url 'recipes:recipe_create' %}" class="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white">Add Recipe</a>
+    </div>
+  </div>
+
+  <form method="get" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5" x-show="filtersOpen || window.innerWidth >= 768">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search recipes..." class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <input type="text" name="cuisine" value="{{ request.GET.cuisine }}" placeholder="Cuisine" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <input type="number" name="max_prep" value="{{ request.GET.max_prep }}" placeholder="Max prep time" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <select name="status" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <option value="">All statuses</option>
+      <option value="favorite" {% if request.GET.status == "favorite" %}selected{% endif %}>Favorite</option>
+      <option value="to_try" {% if request.GET.status == "to_try" %}selected{% endif %}>To Try</option>
+      <option value="made_before" {% if request.GET.status == "made_before" %}selected{% endif %}>Made Before</option>
+    </select>
+    <select name="sort" class="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <option value="newest" {% if request.GET.sort == "newest" or not request.GET.sort %}selected{% endif %}>Newest</option>
+      <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>Oldest</option>
+      <option value="prep" {% if request.GET.sort == "prep" %}selected{% endif %}>Prep time</option>
+      <option value="alpha" {% if request.GET.sort == "alpha" %}selected{% endif %}>Alphabetical</option>
+    </select>
+    <div class="md:col-span-5 flex items-center gap-2">
+      <button class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Apply</button>
+      <a href="." class="rounded-xl border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Reset</a>
+    </div>
+  </form>
+</section>
+
+<section class="mt-6 hidden grid-cols-1 gap-4 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+  {% for recipe in recipes %}
+    {% include "components/recipe_card.html" with recipe=recipe %}
+  {% empty %}
+    <p class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700">No recipes found. Try different filters.</p>
+  {% endfor %}
+</section>
+
+<section class="mt-6 sm:hidden">
+  <div class="flex snap-x gap-4 overflow-x-auto pb-2">
+    {% for recipe in recipes %}
+      <div class="min-w-[84%] snap-center">
+        {% include "components/recipe_card.html" with recipe=recipe %}
+      </div>
+    {% empty %}
+      <p class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700">No recipes found.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}

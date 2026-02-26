@@ -1,0 +1,76 @@
+{% load recipe_extras %}
+<article x-data="{ confirmDelete: false }" class="group overflow-hidden rounded-2xl border border-white/40 bg-white/90 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/85">
+  <div class="relative">
+    {% if recipe.image %}
+      <img src="{{ recipe.image.url }}" alt="{{ recipe.name }}" loading="lazy" class="h-44 w-full object-cover">
+    {% else %}
+      <img src="https://image.pollinations.ai/prompt/{{ recipe.name|urlencode }}%20food%20photo%20studio%20lighting" alt="{{ recipe.name }}" loading="lazy" class="h-44 w-full object-cover">
+    {% endif %}
+    <div class="absolute left-3 top-3 flex gap-2">
+      <span class="rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">{{ recipe.cuisine_type|default:"Global" }}</span>
+      <span class="rounded-full bg-teal-500/90 px-2.5 py-1 text-xs font-medium text-white">{{ recipe.preparation_time }} min</span>
+    </div>
+    <div class="absolute inset-0 hidden items-end justify-center gap-2 bg-black/45 p-3 transition group-hover:flex">
+      <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">View</a>
+      {% if recipe|can_edit:user %}
+        <a href="{% url 'recipes:recipe_update' recipe.pk %}" class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">Edit</a>
+        <button type="button" @click="confirmDelete = true" class="rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white">Delete</button>
+      {% endif %}
+      {% if recipe.created_by_id == user.id %}
+        <a href="{% url 'recipes:recipe_detail' recipe.pk %}#share" class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white">Share</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="space-y-3 p-4">
+    <div class="flex items-start justify-between gap-2">
+      <h3 class="font-display text-base font-semibold text-slate-900 dark:text-slate-100">{{ recipe.name }}</h3>
+      {% if recipe|can_edit:user %}
+        <form method="post" action="{% url 'recipes:recipe_toggle_favorite' recipe.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button class="text-sm {% if recipe.is_favorite %}text-rose-500{% else %}text-slate-400{% endif %}" title="Toggle favorite">♥</button>
+        </form>
+      {% elif recipe.is_favorite %}
+        <span class="text-sm text-rose-500">♥</span>
+      {% endif %}
+    </div>
+    <p class="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{{ recipe.description|default:recipe.ingredients|preview_text:120 }}</p>
+    <div class="flex flex-wrap gap-2">
+      {% if recipe.is_favorite %}
+        <span class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Favorite</span>
+      {% endif %}
+      {% if recipe.status == "to_try" %}
+        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">To Try</span>
+      {% elif recipe.status == "made_before" %}
+        <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Made Before</span>
+      {% endif %}
+      {% for tag in recipe.tags.all|slice:":3" %}
+        <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+    {% if recipe.created_by_id != user.id %}
+      <div class="space-y-1 text-xs text-slate-500 dark:text-slate-400">
+        <div>Shared by {{ recipe.created_by.username }}</div>
+        {% for share in recipe.shares.all %}
+          {% if share.shared_with_id == user.id %}
+            <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] dark:bg-slate-800">{{ share.get_permission_display }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div x-show="confirmDelete" x-cloak class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+    <div @click.outside="confirmDelete = false" class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-slate-900">
+      <h4 class="font-display text-lg font-semibold">Delete recipe?</h4>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">This action cannot be undone.</p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button type="button" @click="confirmDelete = false" class="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700">Cancel</button>
+        <form method="post" action="{% url 'recipes:recipe_delete' recipe.pk %}">
+          {% csrf_token %}
+          <button class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</article>

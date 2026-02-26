@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}AI Tools{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-5 shadow-glass">
+  <h1 class="font-display text-2xl font-bold">AI Tools</h1>
+  <p class="mt-1 text-sm text-slate-500">Generate new recipes, plan your week, and save results directly to your cookbook.</p>
+</section>
+
+<section class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <h2 class="font-display text-xl font-semibold">AI Recipe Generator</h2>
+    <form method="post" class="mt-4 space-y-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="generate_recipe">
+      <label class="block text-sm">
+        <span class="mb-1 block">Ingredients</span>
+        {{ generate_form.available_ingredients }}
+      </label>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label class="block text-sm">
+          <span class="mb-1 block">Dietary restriction</span>
+          {{ generate_form.dietary_restriction }}
+        </label>
+        <label class="block text-sm">
+          <span class="mb-1 block">Cuisine</span>
+          {{ generate_form.cuisine_type }}
+        </label>
+      </div>
+      <label class="block text-sm">
+        <span class="mb-1 block">Max prep time</span>
+        {{ generate_form.max_prep_time }}
+      </label>
+      <button class="rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white">Generate Recipe</button>
+    </form>
+
+    {% if generated_recipe %}
+      <div class="mt-6 rounded-2xl border border-teal-200 bg-teal-50 p-4 dark:border-teal-900/60 dark:bg-teal-950/20">
+        <h3 class="font-display text-lg font-semibold">{{ generated_recipe.title }}</h3>
+        {% if generated_recipe.description %}<p class="mt-1 text-sm">{{ generated_recipe.description }}</p>{% endif %}
+        <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <h4 class="text-sm font-semibold">Ingredients</h4>
+            <ul class="mt-1 list-inside list-disc text-sm">
+              {% for item in generated_recipe.ingredients %}<li>{{ item }}</li>{% endfor %}
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-sm font-semibold">Instructions</h4>
+            <ol class="mt-1 list-inside list-decimal text-sm">
+              {% for step in generated_recipe.instructions %}<li>{{ step }}</li>{% endfor %}
+            </ol>
+          </div>
+        </div>
+        <form method="post" class="mt-4">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save_generated">
+          <input type="hidden" name="title" value="{{ generated_recipe.title }}">
+          <input type="hidden" name="description" value="{{ generated_recipe.description }}">
+          <input type="hidden" name="ingredients" value="{% for item in generated_recipe.ingredients %}{{ item }}{% if not forloop.last %}&#10;{% endif %}{% endfor %}">
+          <input type="hidden" name="instructions" value="{% for step in generated_recipe.instructions %}{{ step }}{% if not forloop.last %}&#10;{% endif %}{% endfor %}">
+          <input type="hidden" name="prep_time" value="{{ generated_recipe.prep_time_minutes }}">
+          <input type="hidden" name="servings" value="{{ generated_recipe.servings }}">
+          <input type="hidden" name="cuisine_type" value="{{ generate_form.cuisine_type.value|default:'' }}">
+          <button class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Save Generated Recipe</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <h2 class="font-display text-xl font-semibold">Smart Meal Planner</h2>
+    <form method="post" class="mt-4 space-y-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="meal_plan">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label class="block text-sm">
+          <span class="mb-1 block">Days</span>
+          {{ meal_form.days }}
+        </label>
+        <label class="block text-sm">
+          <span class="mb-1 block">Max prep time</span>
+          {{ meal_form.max_prep_time }}
+        </label>
+      </div>
+      <label class="block text-sm">
+        <span class="mb-1 block">Dietary restriction</span>
+        {{ meal_form.dietary_restriction }}
+      </label>
+      <button class="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white">Generate Weekly Plan</button>
+    </form>
+
+    {% if meal_plan %}
+      <div class="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-900/60 dark:bg-indigo-950/20">
+        <h3 class="font-display text-lg font-semibold">Your Meal Plan</h3>
+        <ul class="mt-3 space-y-2 text-sm">
+          {% for item in meal_plan %}
+            <li class="rounded-lg border border-indigo-200/80 bg-white/70 px-3 py-2 dark:border-indigo-900/50 dark:bg-slate-900/60">
+              <span class="font-semibold">{{ item.day }}:</span> {{ item.meal }}
+              {% if item.reason %}<span class="block text-xs text-slate-500">{{ item.reason }}</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

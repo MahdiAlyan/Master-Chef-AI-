@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ object.username }}{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-6 shadow-glass">
+  <h1 class="font-display text-2xl font-bold">{{ object.username }}</h1>
+  <p class="mt-2 text-sm text-slate-500">Public profile</p>
+  <a href="{% url 'recipes:public_list' %}" class="mt-4 inline-flex rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">View public recipes</a>
+</section>
+{% endblock %}

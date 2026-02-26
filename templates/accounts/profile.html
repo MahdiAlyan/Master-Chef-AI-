@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-6 shadow-glass">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="font-display text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
+      <p class="text-sm text-slate-500">{{ user.email|default:"No email set" }}</p>
+    </div>
+    <a href="{% url 'accounts:settings' %}" class="rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/80">Edit Profile</a>
+  </div>
+</section>
+
+<section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <p class="text-xs text-slate-500">Owned recipes</p>
+    <p class="mt-2 text-2xl font-semibold">{{ owned_recipe_count }}</p>
+  </div>
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <p class="text-xs text-slate-500">Shared with you</p>
+    <p class="mt-2 text-2xl font-semibold">{{ shared_recipe_count }}</p>
+  </div>
+</section>
+{% endblock %}

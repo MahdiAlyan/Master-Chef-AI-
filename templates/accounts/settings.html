@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<section class="glass rounded-3xl p-6 shadow-glass">
+  <h1 class="font-display text-2xl font-bold">Settings</h1>
+  <p class="mt-1 text-sm text-slate-500">Manage profile, password, theme, and account security.</p>
+</section>
+
+<section class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <h2 class="font-display text-xl font-semibold">Profile</h2>
+    <form method="post" class="mt-4 space-y-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="profile">
+      {% for field in profile_form %}
+        <label class="block text-sm">
+          <span class="mb-1 block">{{ field.label }}</span>
+          {{ field }}
+        </label>
+        {% if field.errors %}<p class="text-xs text-rose-600">{{ field.errors|striptags }}</p>{% endif %}
+      {% endfor %}
+      <button class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Save Profile</button>
+    </form>
+  </div>
+
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <h2 class="font-display text-xl font-semibold">Change Password</h2>
+    <form method="post" class="mt-4 space-y-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="password">
+      {% for field in password_form %}
+        <label class="block text-sm">
+          <span class="mb-1 block">{{ field.label }}</span>
+          {{ field }}
+        </label>
+        {% if field.errors %}<p class="text-xs text-rose-600">{{ field.errors|striptags }}</p>{% endif %}
+      {% endfor %}
+      <button class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Update Password</button>
+    </form>
+  </div>
+
+  <div class="rounded-2xl bg-white/90 p-5 shadow-sm dark:bg-slate-900/85">
+    <h2 class="font-display text-xl font-semibold">Theme</h2>
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="theme">
+      <label class="block text-sm">
+        <span class="mb-1 block">Default mode</span>
+        {{ theme_form.theme }}
+      </label>
+      <button class="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900">Save Theme Preference</button>
+    </form>
+  </div>
+
+  <div class="rounded-2xl border border-rose-200 bg-rose-50/90 p-5 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/20">
+    <h2 class="font-display text-xl font-semibold text-rose-700 dark:text-rose-300">Delete Account</h2>
+    <p class="mt-2 text-sm text-rose-600 dark:text-rose-200">This action permanently removes your account and recipes.</p>
+    <form method="post" class="mt-4 space-y-2">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      {% for field in delete_form %}
+        <label class="block text-sm">
+          <span class="mb-1 block">{{ field.label }}</span>
+          {{ field }}
+        </label>
+        {% if field.errors %}<p class="text-xs text-rose-600">{{ field.errors|striptags }}</p>{% endif %}
+      {% endfor %}
+      <button class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white">Delete Account</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

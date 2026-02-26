@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete Recipe{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-lg rounded-3xl border border-rose-200 bg-white/90 p-6 shadow-lg dark:border-rose-900/60 dark:bg-slate-900/90">
+  <h1 class="font-display text-2xl font-bold">Delete Recipe</h1>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Are you sure you want to delete <strong>{{ object.name }}</strong>?</p>
+  <form method="post" class="mt-5 flex justify-end gap-2">
+    {% csrf_token %}
+    <a href="{% url 'recipes:recipe_detail' object.pk %}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Cancel</a>
+    <button class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white">Delete</button>
+  </form>
+</section>
+{% endblock %}
