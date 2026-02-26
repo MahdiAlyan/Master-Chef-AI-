@@ -89,13 +89,18 @@ DATABASE_URL = env("DATABASE_URL", default="")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
 if DATABASE_URL:
     try:
-        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)}
+        parsed_db = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
+        if parsed_db.get("ENGINE") == "django.db.backends.sqlite3":
+            db_name = str(parsed_db.get("NAME", "")).strip()
+            if db_name and not os.path.isabs(db_name):
+                parsed_db["NAME"] = str((BASE_DIR / db_name).resolve())
+        DATABASES = {"default": parsed_db}
     except Exception as e:
         print(f"[ai_recipe_hub] Invalid DATABASE_URL, falling back to SQLite: {e}", file=sys.stderr)
 
@@ -124,7 +129,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = env("TIME_ZONE", default="UTC")
 USE_I18N = True
 USE_TZ = True
-
 # --------------------------------------------------
 # Static & media
 # --------------------------------------------------
